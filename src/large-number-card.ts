@@ -130,8 +130,10 @@ class LargeNumberCard extends HTMLElement {
       card.style.justifyContent = "center";
       card.style.alignItems = "center";
       card.style.padding = "16px";
-      card.style.background = `linear-gradient(135deg, ${this.config.card.color}, ${this.config.card.color2 || this.config.card.color})`;
       card.style.color = "white";
+      if (this.config.card.color) {
+        card.style.background = `linear-gradient(135deg, ${this.config.card.color}, ${this.config.card.color2 || this.config.card.color})`;
+      }
 
       const numberBox = document.createElement("div");
       numberBox.style.display = "flex";

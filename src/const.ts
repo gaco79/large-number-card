@@ -5,6 +5,6 @@ export const DEFAULT_CONFIG = {
     unit_of_measurement:
         { display: true, as_prefix: false, size: '24', color: '#FFFFFF', font_weight: 'normal' },
     card:
-        { color: '#7B1FA2', color2: null },
+        { color: null, color2: null },
 
 }
