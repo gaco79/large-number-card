@@ -99,7 +99,7 @@ class LargeNumberCard extends HTMLElement {
 
   updateContent() {
     // compute display text from hass + config
-    let display = "0";
+    let state_display_text = "0";
     let unit_of_measurement_text = "";
 
     const hasEntityId = this.config && this.config.entity_id;
@@ -109,19 +109,18 @@ class LargeNumberCard extends HTMLElement {
       const stateObj = hassStates[this.config.entity_id];
 
       if (stateObj) {
-        console.log("Found state object:", stateObj);
-        display = stateObj.state;
+        state_display_text = stateObj.state;
 
         // unit if available
         if (stateObj.attributes && stateObj.attributes.unit_of_measurement) {
           unit_of_measurement_text = stateObj.attributes.unit_of_measurement;
         }
       } else {
-        display = "unknown";
+        state_display_text = "unknown";
       }
     } else if (hasEntityId && !hassStates) {
       // hass not yet available
-      display = "loading";
+      state_display_text = "loading";
     }
 
     if (!this.content) {
@@ -144,7 +143,7 @@ class LargeNumberCard extends HTMLElement {
 
       this.numberEl = numberBox;
 
-      this.updateNumberDisplay(display, unit_of_measurement_text);
+      this.updateNumberDisplay(state_display_text, unit_of_measurement_text);
 
       card.appendChild(numberBox);
 
@@ -154,18 +153,18 @@ class LargeNumberCard extends HTMLElement {
     } else {
       // update existing element
       if (this.numberEl) {
-        this.updateNumberDisplay(display, unit_of_measurement_text);
+        this.updateNumberDisplay(state_display_text, unit_of_measurement_text);
       }
     }
   }
 
-  updateNumberDisplay(display, unit_of_measurement_text) {
+  updateNumberDisplay(state_display_text, unit_of_measurement_text) {
     let number = this.numberEl.querySelector("span#number");
     if (!number) {
       number = document.createElement("span");
       number.id = "number";
     }
-    number.textContent = display;
+    number.textContent = state_display_text;
     number.style.fontSize = this.config.number.size + "px";
     number.style.fontWeight = this.config.number.font_weight;
     number.style.color = this.config.number.color;
