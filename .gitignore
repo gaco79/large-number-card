@@ -1,0 +1,10 @@
+/.rpt2_cache/
+.vscode
+
+/node_modules/
+yarn-error.log
+yarn.lock
+
+/dist
+/config
+/tests
