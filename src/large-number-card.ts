@@ -1,5 +1,6 @@
 import { version } from "../package.json";
 import { customElement } from "lit/decorators.js";
+import { DEFAULT_CONFIG } from "./const";
 
 @customElement("large-number-card")
 class LargeNumberCard extends HTMLElement {
@@ -13,7 +14,6 @@ class LargeNumberCard extends HTMLElement {
   set hass(hass) {
     // store hass internally and re-render when it changes
     this._hass = hass;
-    console.log("HASS object updated:", hass);
     this.updateContent();
   }
 
@@ -26,7 +26,9 @@ class LargeNumberCard extends HTMLElement {
 
     if (hasEntityId && hassStates) {
       const stateObj = hassStates[this.config.entity_id];
+
       if (stateObj) {
+        console.log("Found state object:", stateObj);
         display = stateObj.state;
         // append unit if available
         if (stateObj.attributes && stateObj.attributes.unit_of_measurement) {
@@ -43,21 +45,24 @@ class LargeNumberCard extends HTMLElement {
     if (!this.content) {
       const card = document.createElement("ha-card");
 
+      card.style.display = "flex";
+      card.style.justifyContent = "center";
+      card.style.alignItems = "center";
       card.style.padding = "16px";
-      card.style.background = "linear-gradient(135deg, #4f46e5, #06b6d4)";
+      card.style.background = `linear-gradient(135deg, ${this.config.card.color}, ${this.config.card.color2 || this.config.card.color})`;
       card.style.color = "white";
-      card.style.borderRadius = "1rem";
-      card.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
 
       const number = document.createElement("div");
       number.textContent = display;
-      number.style.fontSize = "2rem";
-      number.style.fontWeight = "bold";
+      number.style.fontSize = this.config.number.size + "px";
+      number.style.fontWeight = this.config.number.font_weight;
+      number.style.color = this.config.number.color;
       number.style.marginBottom = "12px";
 
       card.appendChild(number);
 
       this.appendChild(card);
+
       this.content = card;
       this.numberEl = number;
     } else {
@@ -76,10 +81,12 @@ class LargeNumberCard extends HTMLElement {
   }
 
   setConfig(config) {
-    this.config = config || {};
+    this.config = Object.assign({}, DEFAULT_CONFIG, config);
+
     if (!this.config.entity_id) {
       console.warn('large-number-card: no entity_id provided in config');
     }
+
     this.updateContent();
   }
 
