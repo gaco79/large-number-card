@@ -89,6 +89,7 @@ class LargeNumberCard extends HTMLElement {
   config;
   _hass;
   numberEl;
+  card;
 
 
   set hass(hass) {
@@ -97,7 +98,7 @@ class LargeNumberCard extends HTMLElement {
     this.updateContent();
   }
 
-  updateContent() {
+  async updateContent() {
     // compute display text from hass + config
     let state_display_text = "0";
     let unit_of_measurement_text = "";
@@ -123,17 +124,32 @@ class LargeNumberCard extends HTMLElement {
       state_display_text = "loading";
     }
 
-    if (!this.content) {
-      const card = document.createElement("ha-card");
 
-      card.style.display = "flex";
-      card.style.justifyContent = "center";
-      card.style.alignItems = "center";
-      card.style.padding = "16px";
-      card.style.color = "white";
-      if (this.config.card.color) {
-        card.style.background = `linear-gradient(135deg, ${this.config.card.color}, ${this.config.card.color2 || this.config.card.color})`;
+    if (this.config.card.color.includes("{{")) {
+      if (this._hass && typeof this._hass.callApi === "function") {
+        this._hass.callApi('POST', 'template', {
+          template: this.config.card.color
+        }).then((rendered: any) => {
+          if (typeof rendered === "string" && rendered.trim() !== "") {
+            this.config.card.color = rendered.trim();
+            this.updateContent();
+          }
+          console.log("rendered color: ", this.config.card.color);
+        }).catch((err: any) => {
+          console.warn("large-number-card: template render failed", err);
+        });
       }
+    }
+
+
+    if (!this.content) {
+      this.card = document.createElement("ha-card");
+
+      this.card.style.display = "flex";
+      this.card.style.justifyContent = "center";
+      this.card.style.alignItems = "center";
+      this.card.style.padding = "16px";
+      this.card.style.color = "white";
 
       const numberBox = document.createElement("div");
       numberBox.style.display = "flex";
@@ -147,11 +163,11 @@ class LargeNumberCard extends HTMLElement {
 
       this.updateNumberDisplay(state_display_text, unit_of_measurement_text);
 
-      card.appendChild(numberBox);
+      this.card.appendChild(numberBox);
 
-      this.appendChild(card);
+      this.appendChild(this.card);
 
-      this.content = card;
+      this.content = this.card;
     } else {
       // update existing element
       if (this.numberEl) {
@@ -161,6 +177,11 @@ class LargeNumberCard extends HTMLElement {
   }
 
   updateNumberDisplay(state_display_text, unit_of_measurement_text) {
+    if (this.config.card.color && !this.config.card.color.includes("{{")) {
+      console.log("large-number-card: applying card colors", this.config.card.color, this.config.card.color2);
+      this.card.style.background = `linear-gradient(135deg, ${this.config.card.color}, ${this.config.card.color2 || this.config.card.color})`;
+    }
+
     let number = this.numberEl.querySelector("span#number");
     if (!number) {
       number = document.createElement("span");
@@ -217,6 +238,7 @@ class LargeNumberCard extends HTMLElement {
 
   setConfig(config) {
     this.config = this.deepMerge(DEFAULT_CONFIG, config || {});
+    console.log("large-number-card: effective config", this.config);
 
     if (!this.config.entity_id) {
       console.warn('large-number-card: no entity_id provided in config');
