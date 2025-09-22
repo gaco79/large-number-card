@@ -125,7 +125,7 @@ class LargeNumberCard extends HTMLElement {
     }
 
 
-    if (this.config.card.color.includes("{{")) {
+    if (this.config.card.color.includes("{{") || this.config.card.color.includes("{%")) {
       if (this._hass && typeof this._hass.callApi === "function") {
         this._hass.callApi('POST', 'template', {
           template: this.config.card.color
