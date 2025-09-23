@@ -90,6 +90,7 @@ class LargeNumberCard extends HTMLElement {
   _hass;
   numberEl;
   card;
+  shadowConfig; // <-- added shadow config to hold rendered/template-resolved values
 
 
   set hass(hass) {
@@ -130,28 +131,56 @@ class LargeNumberCard extends HTMLElement {
   }
 
   /**
-   * If card.color is a template, render it via hass.callApi and update config.card.color.
+   * If card.color is a template, render it via hass.callApi and update shadowConfig.card.color.
    */
   private async applyCardTemplateColor() {
-    if (!this.config || !this.config.card || !this.config.card.color) return;
+    // ensure config/card present
+    if (!this.config || !this.config.card) return;
 
-    const colorTemplate = this.config.card.color;
-    if (colorTemplate.includes("{{") || colorTemplate.includes("{%")) {
-      if (this._hass && typeof this._hass.callApi === "function") {
-        try {
-          const rendered: any = await this._hass.callApi('POST', 'template', {
-            template: colorTemplate
-          });
-          if (typeof rendered === "string" && rendered.trim() !== "") {
-            this.config.card.color = rendered.trim();
-            // no immediate re-render here; caller may continue to update content
+    // ensure shadowConfig exists (clone of this.config)
+    if (!this.shadowConfig) {
+      this.shadowConfig = this.deepMerge({}, this.config);
+    } else {
+      // keep shadowConfig keys for card initialized
+      this.shadowConfig.card = this.shadowConfig.card || {};
+    }
+
+    const cardCfg = this.config.card || {};
+    const keys = ["color", "color2"];
+
+    for (const key of keys) {
+      const tpl = cardCfg[key];
+      // if no value, ensure shadow has something sensible
+      if (!tpl && this.shadowConfig.card[key]) continue;
+
+      if (typeof tpl === "string" && (tpl.includes("{{") || tpl.includes("{%"))) {
+        if (this._hass && typeof this._hass.callApi === "function") {
+          try {
+            const rendered: any = await this._hass.callApi('POST', 'template', {
+              template: tpl
+            });
+            if (typeof rendered === "string" && rendered.trim() !== "") {
+              this.shadowConfig.card[key] = rendered.trim();
+            } else {
+              // fallback to previous shadow value or original template text
+              this.shadowConfig.card[key] = this.shadowConfig.card[key] || tpl;
+            }
+          } catch (err: any) {
+            console.warn(`large-number-card: template render failed for card.${key}`, err);
+            this.shadowConfig.card[key] = this.shadowConfig.card[key] || tpl;
           }
-          console.log("rendered color: ", this.config.card.color);
-        } catch (err: any) {
-          console.warn("large-number-card: template render failed", err);
+        } else {
+          // no hass.callApi available yet; keep previous shadow or raw template
+          this.shadowConfig.card[key] = this.shadowConfig.card[key] || tpl;
         }
+      } else {
+        // static value: copy into shadow so background can use it uniformly
+        this.shadowConfig.card[key] = tpl;
       }
     }
+
+    // debug
+    // console.log("large-number-card: shadow card colors", this.shadowConfig.card.color, this.shadowConfig.card.color2);
   }
 
   /**
@@ -186,7 +215,7 @@ class LargeNumberCard extends HTMLElement {
     // compute display text from hass + config
     const { state_display_text, unit_of_measurement_text } = this.computeDisplayTexts();
 
-    // evaluate templates in card color if needed (may update config.card.color)
+    // evaluate templates in card color if needed (may update shadowConfig.card.color)
     await this.applyCardTemplateColor();
 
     // create card and number container if this is first render
@@ -199,10 +228,12 @@ class LargeNumberCard extends HTMLElement {
   }
 
   updateNumberDisplay(state_display_text, unit_of_measurement_text) {
-    // apply card gradient if color is static
-    if (this.config.card.color && !this.config.card.color.includes("{{")) {
-      console.log("large-number-card: applying card colors", this.config.card.color, this.config.card.color2);
-      this.card.style.background = `linear-gradient(135deg, ${this.config.card.color}, ${this.config.card.color2 || this.config.card.color})`;
+    // apply card gradient using shadowConfig (rendered values) if available
+    const shadowCard = (this.shadowConfig && this.shadowConfig.card) ? this.shadowConfig.card : (this.config && this.config.card ? this.config.card : {});
+    if (shadowCard && shadowCard.color) {
+      // use shadow values (rendered templates or static values)
+      // console.log("large-number-card: applying card colors", shadowCard.color, shadowCard.color2);
+      this.card.style.background = `linear-gradient(135deg, ${shadowCard.color}, ${shadowCard.color2 || shadowCard.color})`;
     }
 
     // ensure number span
@@ -276,6 +307,9 @@ class LargeNumberCard extends HTMLElement {
 
   setConfig(config) {
     this.config = this.deepMerge(DEFAULT_CONFIG, config || {});
+    // initialize shadowConfig as a clone so templates can be re-rendered into it
+    this.shadowConfig = this.deepMerge({}, this.config);
+
     console.log("large-number-card: effective config", this.config);
 
     if (!this.config.entity_id) {
