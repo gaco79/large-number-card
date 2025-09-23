@@ -3,7 +3,7 @@ export const DEFAULT_CONFIG = {
     number:
         { size: '48', color: '#FFFFFF', font_weight: 'bold', decimals: 1 },
     unit_of_measurement:
-        { display: true, as_prefix: false, size: '24', color: '#FFFFFF', font_weight: 'normal' },
+        { display: true, as_prefix: false, display_text: null, size: '24', color: '#FFFFFF', font_weight: 'normal' },
     card:
         { color: null, color2: null },
 

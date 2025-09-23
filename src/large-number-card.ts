@@ -129,7 +129,11 @@ class LargeNumberCard extends HTMLElement {
         }
 
         // unit if available
-        if (stateObj.attributes && stateObj.attributes.unit_of_measurement) {
+        // prefer explicit display_text from config when provided (not null/undefined)
+        const cfgUnitText = this?.config?.unit_of_measurement?.display_text;
+        if (cfgUnitText !== null && cfgUnitText !== undefined) {
+          unit_of_measurement_text = String(cfgUnitText);
+        } else if (stateObj.attributes && stateObj.attributes.unit_of_measurement) {
           unit_of_measurement_text = stateObj.attributes.unit_of_measurement;
         }
       } else {
