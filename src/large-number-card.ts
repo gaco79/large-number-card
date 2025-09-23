@@ -271,8 +271,9 @@ class LargeNumberCard extends HTMLElement {
       this.numberEl.appendChild(number);
     }
 
-    // handle unit if displayed
-    if (this.config.unit_of_measurement.display) {
+    // handle unit if displayed (guard in case unit_of_measurement is missing or null)
+    const uomCfg = this.config && this.config.unit_of_measurement ? this.config.unit_of_measurement : null;
+    if (uomCfg && uomCfg.display) {
       let unit_of_measurement_element = this.numberEl.querySelector("span#unit_of_measurement");
 
       if (!unit_of_measurement_element) {
@@ -281,9 +282,9 @@ class LargeNumberCard extends HTMLElement {
       }
 
       unit_of_measurement_element.textContent = unit_of_measurement_text;
-      unit_of_measurement_element.style.fontSize = this.config.unit_of_measurement.size + "px";
-      unit_of_measurement_element.style.fontWeight = this.config.unit_of_measurement.font_weight;
-      unit_of_measurement_element.style.color = this.config.unit_of_measurement.color;
+      unit_of_measurement_element.style.fontSize = (uomCfg.size || DEFAULT_CONFIG.unit_of_measurement.size) + "px";
+      unit_of_measurement_element.style.fontWeight = uomCfg.font_weight || DEFAULT_CONFIG.unit_of_measurement.font_weight;
+      unit_of_measurement_element.style.color = uomCfg.color || DEFAULT_CONFIG.unit_of_measurement.color;
       unit_of_measurement_element.style.margin = "0 8px";
 
       if (!unit_of_measurement_element.parentElement) {
@@ -298,7 +299,7 @@ class LargeNumberCard extends HTMLElement {
     }
 
     // layout direction when unit is prefix
-    if (this.config.unit_of_measurement.display && this.config.unit_of_measurement.as_prefix) {
+    if (uomCfg && uomCfg.display && uomCfg.as_prefix) {
       this.numberEl.style.flexDirection = "row-reverse";
     } else {
       this.numberEl.style.flexDirection = "row";
