@@ -202,7 +202,7 @@ class LargeNumberCard extends HTMLElement {
       if (typeof tpl === "string" && (tpl.includes("{{") || tpl.includes("{%"))) {
         if (this._hass && typeof this._hass.callApi === "function") {
           try {
-            const rendered: any = await this._hass.callApi('POST', 'template', {
+            const rendered: string = await this._hass.callApi('POST', 'template', {
               template: tpl
             });
             if (typeof rendered === "string" && rendered.trim() !== "") {
@@ -211,7 +211,7 @@ class LargeNumberCard extends HTMLElement {
               // fallback to previous shadow value or original template text
               this.shadowConfig.card[key] = this.shadowConfig.card[key] || tpl;
             }
-          } catch (err: any) {
+          } catch (err) {
             console.warn(`large-number-card: template render failed for card.${key}`, err);
             this.shadowConfig.card[key] = this.shadowConfig.card[key] || tpl;
           }
@@ -349,7 +349,9 @@ class LargeNumberCard extends HTMLElement {
     Deep merge helper to merge nested config objects like number, unit_of_measurement, card
   */
   private deepMerge(target: any, source: any): any {
+
     const out: any = Array.isArray(target) ? [...target] : { ...target };
+
     if (source && typeof source === "object") {
       for (const key of Object.keys(source)) {
         const val = source[key];
@@ -360,6 +362,7 @@ class LargeNumberCard extends HTMLElement {
         }
       }
     }
+
     return out;
   }
 
