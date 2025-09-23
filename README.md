@@ -37,17 +37,19 @@ In Home Assistant click `Edit Dashboard`, then `Add Card` and scroll down to fin
 
 ```YAML
 type: custom:large-number-card
-highlight_text_color: "#dd4b4b"
-show_highlight_glow: false
-muted_text_brightness: 0.07
+card:
+  color: red
+number:
+  size: 96
+unit_of_measurement:
+  display: false
 ```
 
-| Name                    |  Type  |                      Default                      | Values                                                                                                                                                           |
-| ----------------------- | :----: | :-----------------------------------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `highlight_text_color`  | string | The primary colour from your Home Assistant theme | Any valid hex colour eg "<span style="color:#3366bb">#3366bb</span>", "<span style="color:#00ff33">#00ff33</span>", "<span style="color:#6842a9">#6842a9</span>" |
-| `show_highlight_glow`   |  bool  |                       true                        | `true` or `false`                                                                                                                                                |
-| `muted_text_brightness` | number |                        0.1                        | Any decimal from 0.0 to 1.0. Sets brightness of "background" words                                                                                               |
-| `language`              | string | Your local language, or English if not supported  | `de`, `en-GB`, `fr`, `nl`, `ru`                                                                                                                                  |
+| Name                    |  Type  |                      See                      |
+| ----------------------- | :----: | :-----------------------------------------------: |
+| `card`                | object |   { color: null, color2: null }  |
+| `number`              |  bool  |                       true                        |
+| `unit_of_measurement` | number |                        0.1                        |
 
 ## My Other Cards
 
