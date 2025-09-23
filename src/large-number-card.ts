@@ -1,6 +1,6 @@
 import { version } from "../package.json";
 import { customElement } from "lit/decorators.js";
-import { DEFAULT_CONFIG } from "./const";
+import { DEFAULT_CONFIG, FONT_REGISTRY } from "./const";
 
 /**
  * LargeNumberCard
@@ -94,6 +94,35 @@ class LargeNumberCard extends HTMLElement {
   /** Shadow config holds rendered/template-resolved values */
   shadowConfig;
 
+  /** Track loaded fonts to avoid duplicate loading */
+  private loadedFonts = new Set<string>();
+
+
+  /**
+   * Load a font if it's not already loaded and is in the font registry
+   */
+  private loadFont(fontFamily: string): void {
+    if (!fontFamily || fontFamily === 'Home Assistant') {
+      return; // No loading needed for default font
+    }
+
+    if (this.loadedFonts.has(fontFamily)) {
+      return; // Already loaded
+    }
+
+    const fontUrl = FONT_REGISTRY[fontFamily as keyof typeof FONT_REGISTRY];
+    if (fontUrl) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = fontUrl;
+      document.head.appendChild(link);
+      this.loadedFonts.add(fontFamily);
+    } else {
+      // For custom fonts or fonts not in registry, assume they're available
+      // Could be system fonts or fonts loaded elsewhere
+      this.loadedFonts.add(fontFamily);
+    }
+  }
 
   set hass(hass) {
     // store hass internally and re-render when it changes
@@ -254,6 +283,10 @@ class LargeNumberCard extends HTMLElement {
       this.card.style.background = `linear-gradient(135deg, ${shadowCard.color}, ${shadowCard.color2 || shadowCard.color})`;
     }
 
+    // Load fonts if needed
+    const numberFontFamily = this.config.number.font_family || DEFAULT_CONFIG.number.font_family;
+    this.loadFont(numberFontFamily);
+
     // ensure number span
     let number = this.numberEl.querySelector("span#number");
     if (!number) {
@@ -265,6 +298,7 @@ class LargeNumberCard extends HTMLElement {
     number.style.fontSize = this.config.number.size + "px";
     number.style.fontWeight = this.config.number.font_weight;
     number.style.color = this.config.number.color;
+    number.style.fontFamily = numberFontFamily === 'Home Assistant' ? 'var(--ha-card-header-font-family, inherit)' : numberFontFamily;
 
     // append or re-append ensures ordering when direction changes
     if (!number.parentElement) {
@@ -274,6 +308,10 @@ class LargeNumberCard extends HTMLElement {
     // handle unit if displayed (guard in case unit_of_measurement is missing or null)
     const uomCfg = this.config && this.config.unit_of_measurement ? this.config.unit_of_measurement : null;
     if (uomCfg && uomCfg.display) {
+      // Load font for unit if different from number font
+      const unitFontFamily = uomCfg.font_family || DEFAULT_CONFIG.unit_of_measurement.font_family;
+      this.loadFont(unitFontFamily);
+
       let unit_of_measurement_element = this.numberEl.querySelector("span#unit_of_measurement");
 
       if (!unit_of_measurement_element) {
@@ -285,6 +323,7 @@ class LargeNumberCard extends HTMLElement {
       unit_of_measurement_element.style.fontSize = (uomCfg.size || DEFAULT_CONFIG.unit_of_measurement.size) + "px";
       unit_of_measurement_element.style.fontWeight = uomCfg.font_weight || DEFAULT_CONFIG.unit_of_measurement.font_weight;
       unit_of_measurement_element.style.color = uomCfg.color || DEFAULT_CONFIG.unit_of_measurement.color;
+      unit_of_measurement_element.style.fontFamily = unitFontFamily === 'Home Assistant' ? 'var(--ha-card-header-font-family, inherit)' : unitFontFamily;
       unit_of_measurement_element.style.margin = "0 8px";
 
       if (!unit_of_measurement_element.parentElement) {

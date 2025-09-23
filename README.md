@@ -41,15 +41,63 @@ card:
   color: red
 number:
   size: 96
+  font_family: "Rubik Microbe"
 unit_of_measurement:
   display: false
 ```
 
-| Name                    |  Type  |                      See                      |
-| ----------------------- | :----: | :-----------------------------------------------: |
-| `card`                | object |   { color: null, color2: null }  |
-| `number`              |  bool  |                       true                        |
-| `unit_of_measurement` | number |                        0.1                        |
+#### Font Configuration
+
+The card supports custom fonts for both the number and unit of measurement. Fonts are loaded dynamically only when needed.
+
+**Available Predefined Fonts:**
+- `Home Assistant` (default) - Uses the default Home Assistant font
+- `Rubik Microbe` - Expressive Google Font with a playful style
+- `Rubik Doodle Shadow` - Bold shadowed Google Font
+- `Monofett` - Stylized monospace Google Font
+
+**Usage Examples:**
+
+```YAML
+# Use a Google Font for the number only
+type: custom:large-number-card
+entity_id: sensor.temperature
+number:
+  size: 64
+  font_family: "Rubik Microbe"
+  color: "#FFFFFF"
+unit_of_measurement:
+  display: true
+  font_family: "Home Assistant"
+```
+
+```YAML
+# Use the same custom font for both number and unit
+type: custom:large-number-card
+entity_id: sensor.power
+number:
+  size: 48
+  font_family: "Monofett"
+unit_of_measurement:
+  display: true
+  font_family: "Monofett"
+  size: 16
+```
+
+**Custom Fonts:**
+You can also specify any system font or custom font name. For Google Fonts not in the predefined list, ensure they are loaded elsewhere in your Home Assistant setup.
+
+**Configuration Options:**
+
+**Configuration Options:**
+
+| Name                    |  Type  |                      Default                      | Description |
+| ----------------------- | :----: | :-----------------------------------------------: | ----------- |
+| `card`                  | object |   `{ color: null, color2: null }`               | Card styling options |
+| `number`                | object |   `{ size: 48, color: '#FFFFFF', font_weight: 'bold', decimals: 1, font_family: 'Home Assistant' }` | Number display options |
+| `number.font_family`    | string |   `'Home Assistant'`                            | Font family for the number |
+| `unit_of_measurement`   | object |   `{ display: true, as_prefix: false, size: 24, color: '#FFFFFF', font_weight: 'normal', font_family: 'Home Assistant' }` | Unit display options |
+| `unit_of_measurement.font_family` | string | `'Home Assistant'`                     | Font family for the unit |
 
 ## My Other Cards
 
