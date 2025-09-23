@@ -98,8 +98,10 @@ class LargeNumberCard extends HTMLElement {
     this.updateContent();
   }
 
-  async updateContent() {
-    // compute display text from hass + config
+  /**
+   * Compute the display text and unit from hass + config.
+   */
+  private computeDisplayTexts() {
     let state_display_text = "0";
     let unit_of_measurement_text = "";
 
@@ -124,76 +126,103 @@ class LargeNumberCard extends HTMLElement {
       state_display_text = "loading";
     }
 
+    return { state_display_text, unit_of_measurement_text };
+  }
 
-    if (this.config.card.color.includes("{{") || this.config.card.color.includes("{%")) {
+  /**
+   * If card.color is a template, render it via hass.callApi and update config.card.color.
+   */
+  private async applyCardTemplateColor() {
+    if (!this.config || !this.config.card || !this.config.card.color) return;
+
+    const colorTemplate = this.config.card.color;
+    if (colorTemplate.includes("{{") || colorTemplate.includes("{%")) {
       if (this._hass && typeof this._hass.callApi === "function") {
-        this._hass.callApi('POST', 'template', {
-          template: this.config.card.color
-        }).then((rendered: any) => {
+        try {
+          const rendered: any = await this._hass.callApi('POST', 'template', {
+            template: colorTemplate
+          });
           if (typeof rendered === "string" && rendered.trim() !== "") {
             this.config.card.color = rendered.trim();
-            this.updateContent();
+            // no immediate re-render here; caller may continue to update content
           }
           console.log("rendered color: ", this.config.card.color);
-        }).catch((err: any) => {
+        } catch (err: any) {
           console.warn("large-number-card: template render failed", err);
-        });
-      }
-    }
-
-
-    if (!this.content) {
-      this.card = document.createElement("ha-card");
-
-      this.card.style.display = "flex";
-      this.card.style.justifyContent = "center";
-      this.card.style.alignItems = "center";
-      this.card.style.padding = "16px";
-      this.card.style.color = "white";
-
-      const numberBox = document.createElement("div");
-      numberBox.style.display = "flex";
-      numberBox.style.flexDirection = "row";
-
-      numberBox.style.justifyContent = "center";
-      numberBox.style.alignItems = "center";
-
-
-      this.numberEl = numberBox;
-
-      this.updateNumberDisplay(state_display_text, unit_of_measurement_text);
-
-      this.card.appendChild(numberBox);
-
-      this.appendChild(this.card);
-
-      this.content = this.card;
-    } else {
-      // update existing element
-      if (this.numberEl) {
-        this.updateNumberDisplay(state_display_text, unit_of_measurement_text);
+        }
       }
     }
   }
 
+  /**
+   * Ensure the ha-card and number container exist and are initialized.
+   */
+  private ensureCard() {
+    if (this.content) return;
+
+    this.card = document.createElement("ha-card");
+
+    this.card.style.display = "flex";
+    this.card.style.justifyContent = "center";
+    this.card.style.alignItems = "center";
+    this.card.style.padding = "16px";
+    this.card.style.color = "white";
+
+    const numberBox = document.createElement("div");
+    numberBox.style.display = "flex";
+    numberBox.style.flexDirection = "row";
+    numberBox.style.justifyContent = "center";
+    numberBox.style.alignItems = "center";
+
+    this.numberEl = numberBox;
+
+    this.card.appendChild(numberBox);
+    this.appendChild(this.card);
+
+    this.content = this.card;
+  }
+
+  async updateContent() {
+    // compute display text from hass + config
+    const { state_display_text, unit_of_measurement_text } = this.computeDisplayTexts();
+
+    // evaluate templates in card color if needed (may update config.card.color)
+    await this.applyCardTemplateColor();
+
+    // create card and number container if this is first render
+    this.ensureCard();
+
+    // update number & unit elements and styles
+    if (this.numberEl) {
+      this.updateNumberDisplay(state_display_text, unit_of_measurement_text);
+    }
+  }
+
   updateNumberDisplay(state_display_text, unit_of_measurement_text) {
+    // apply card gradient if color is static
     if (this.config.card.color && !this.config.card.color.includes("{{")) {
       console.log("large-number-card: applying card colors", this.config.card.color, this.config.card.color2);
       this.card.style.background = `linear-gradient(135deg, ${this.config.card.color}, ${this.config.card.color2 || this.config.card.color})`;
     }
 
+    // ensure number span
     let number = this.numberEl.querySelector("span#number");
     if (!number) {
       number = document.createElement("span");
       number.id = "number";
+      // small separation to unit handled by unit element margin
     }
     number.textContent = state_display_text;
     number.style.fontSize = this.config.number.size + "px";
     number.style.fontWeight = this.config.number.font_weight;
     number.style.color = this.config.number.color;
 
-    this.numberEl.appendChild(number);
+    // append or re-append ensures ordering when direction changes
+    if (!number.parentElement) {
+      this.numberEl.appendChild(number);
+    }
 
+    // handle unit if displayed
     if (this.config.unit_of_measurement.display) {
       let unit_of_measurement_element = this.numberEl.querySelector("span#unit_of_measurement");
 
@@ -208,14 +237,23 @@ class LargeNumberCard extends HTMLElement {
       unit_of_measurement_element.style.color = this.config.unit_of_measurement.color;
       unit_of_measurement_element.style.margin = "0 8px";
 
-      this.numberEl.appendChild(unit_of_measurement_element);
+      if (!unit_of_measurement_element.parentElement) {
+        this.numberEl.appendChild(unit_of_measurement_element);
+      }
+    } else {
+      // remove unit element if present and not desired
+      const existingUnit = this.numberEl.querySelector("span#unit_of_measurement");
+      if (existingUnit && existingUnit.parentElement) {
+        existingUnit.parentElement.removeChild(existingUnit);
+      }
     }
 
+    // layout direction when unit is prefix
     if (this.config.unit_of_measurement.display && this.config.unit_of_measurement.as_prefix) {
       this.numberEl.style.flexDirection = "row-reverse";
+    } else {
+      this.numberEl.style.flexDirection = "row";
     }
-
-
   }
 
   /**
