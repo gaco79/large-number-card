@@ -90,7 +90,9 @@ class LargeNumberCard extends HTMLElement {
   _hass;
   numberEl;
   card;
-  shadowConfig; // <-- added shadow config to hold rendered/template-resolved values
+
+  /** Shadow config holds rendered/template-resolved values */
+  shadowConfig;
 
 
   set hass(hass) {
@@ -113,7 +115,18 @@ class LargeNumberCard extends HTMLElement {
       const stateObj = hassStates[this.config.entity_id];
 
       if (stateObj) {
-        state_display_text = stateObj.state;
+        const rawState = stateObj.state;
+        const parsed = Number(rawState);
+
+        if (!Number.isFinite(parsed)) {
+          // non-numeric state – keep original text (e.g. "unknown", "on")
+          state_display_text = String(rawState);
+        } else {
+          const decimalsCfgRaw = this?.config?.number?.decimals ?? DEFAULT_CONFIG.number.decimals;
+          const decimalsCfg = Number.isFinite(Number(decimalsCfgRaw)) ? Number(decimalsCfgRaw) : DEFAULT_CONFIG.number.decimals;
+          const useDecimals = Number.isInteger(decimalsCfg) && decimalsCfg >= 0;
+          state_display_text = useDecimals ? parsed.toFixed(decimalsCfg) : String(parsed);
+        }
 
         // unit if available
         if (stateObj.attributes && stateObj.attributes.unit_of_measurement) {
@@ -202,6 +215,7 @@ class LargeNumberCard extends HTMLElement {
     numberBox.style.flexDirection = "row";
     numberBox.style.justifyContent = "center";
     numberBox.style.alignItems = "center";
+    numberBox.style.margin = "16px";
 
     this.numberEl = numberBox;
 
@@ -309,8 +323,6 @@ class LargeNumberCard extends HTMLElement {
     this.config = this.deepMerge(DEFAULT_CONFIG, config || {});
     // initialize shadowConfig as a clone so templates can be re-rendered into it
     this.shadowConfig = this.deepMerge({}, this.config);
-
-    console.log("large-number-card: effective config", this.config);
 
     if (!this.config.entity_id) {
       console.warn('large-number-card: no entity_id provided in config');
