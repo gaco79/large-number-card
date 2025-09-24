@@ -19,12 +19,6 @@ This is a TypeScript/JavaScript Home Assistant Lovelace custom card that display
 - **Linting check**: `npm run check` - takes ~1 second
 - **Auto-format code**: `npm run format` - fixes formatting
 
-### Development Environment
-- Start Home Assistant: `docker compose up -d` - takes ~50 seconds (Docker image download ~700MB). NEVER CANCEL.
-- Stop environment: `docker compose down` - takes ~4 seconds
-- Development URL: http://localhost:8123/ (returns 302 redirect when healthy)
-- Card files are mounted to `/config/www/large-number-card/` in the container
-
 ### Release Process
 - Releases are automated via GitHub Actions on tag pushes
 
