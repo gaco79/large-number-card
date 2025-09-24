@@ -1,6 +1,6 @@
-import { version } from "../package.json";
-import { customElement } from "lit/decorators.js";
-import { DEFAULT_CONFIG, FONT_REGISTRY } from "./const";
+import { version } from '../package.json';
+import { customElement } from 'lit/decorators.js';
+import { DEFAULT_CONFIG, FONT_REGISTRY } from './const';
 
 /**
  * LargeNumberCard
@@ -82,9 +82,8 @@ import { DEFAULT_CONFIG, FONT_REGISTRY } from "./const";
  * - Types are intentionally loose (any) for `hass` and `config` because the component is
  *   primarily configured with plain JS objects and integrates with Home Assistant's dynamic shape.
  */
-@customElement("large-number-card")
+@customElement('large-number-card')
 class LargeNumberCard extends HTMLElement {
-
   content;
   config;
   _hass;
@@ -96,7 +95,6 @@ class LargeNumberCard extends HTMLElement {
 
   /** Track loaded fonts to avoid duplicate loading */
   private loadedFonts = new Set<string>();
-
 
   /**
    * Load a font if it's not already loaded and is in the font registry
@@ -134,8 +132,8 @@ class LargeNumberCard extends HTMLElement {
    * Compute the display text and unit from hass + config.
    */
   private computeDisplayTexts() {
-    let state_display_text = "0";
-    let unit_of_measurement_text = "";
+    let state_display_text = '0';
+    let unit_of_measurement_text = '';
 
     const hasEntityId = this.config && this.config.entity_id;
     const hassStates = this._hass && this._hass.states;
@@ -152,7 +150,9 @@ class LargeNumberCard extends HTMLElement {
           state_display_text = String(rawState);
         } else {
           const decimalsCfgRaw = this?.config?.number?.decimals ?? DEFAULT_CONFIG.number.decimals;
-          const decimalsCfg = Number.isFinite(Number(decimalsCfgRaw)) ? Number(decimalsCfgRaw) : DEFAULT_CONFIG.number.decimals;
+          const decimalsCfg = Number.isFinite(Number(decimalsCfgRaw))
+            ? Number(decimalsCfgRaw)
+            : DEFAULT_CONFIG.number.decimals;
           const useDecimals = Number.isInteger(decimalsCfg) && decimalsCfg >= 0;
           state_display_text = useDecimals ? parsed.toFixed(decimalsCfg) : String(parsed);
         }
@@ -166,11 +166,11 @@ class LargeNumberCard extends HTMLElement {
           unit_of_measurement_text = stateObj.attributes.unit_of_measurement;
         }
       } else {
-        state_display_text = "unknown";
+        state_display_text = 'unknown';
       }
     } else if (hasEntityId && !hassStates) {
       // hass not yet available
-      state_display_text = "loading";
+      state_display_text = 'loading';
     }
 
     return { state_display_text, unit_of_measurement_text };
@@ -192,26 +192,26 @@ class LargeNumberCard extends HTMLElement {
     }
 
     const cardCfg = this.config.card || {};
-    const keys = ["color", "color2"];
+    const keys = ['color', 'color2'];
 
     for (const key of keys) {
       const tpl = cardCfg[key];
       // if no value, ensure shadow has something sensible
       if (!tpl && this.shadowConfig.card[key]) continue;
 
-      if (typeof tpl === "string" && (tpl.includes("{{") || tpl.includes("{%"))) {
-        if (this._hass && typeof this._hass.callApi === "function") {
+      if (typeof tpl === 'string' && (tpl.includes('{{') || tpl.includes('{%'))) {
+        if (this._hass && typeof this._hass.callApi === 'function') {
           try {
-            const rendered: any = await this._hass.callApi('POST', 'template', {
-              template: tpl
+            const rendered: string = await this._hass.callApi('POST', 'template', {
+              template: tpl,
             });
-            if (typeof rendered === "string" && rendered.trim() !== "") {
+            if (typeof rendered === 'string' && rendered.trim() !== '') {
               this.shadowConfig.card[key] = rendered.trim();
             } else {
               // fallback to previous shadow value or original template text
               this.shadowConfig.card[key] = this.shadowConfig.card[key] || tpl;
             }
-          } catch (err: any) {
+          } catch (err) {
             console.warn(`large-number-card: template render failed for card.${key}`, err);
             this.shadowConfig.card[key] = this.shadowConfig.card[key] || tpl;
           }
@@ -235,20 +235,20 @@ class LargeNumberCard extends HTMLElement {
   private ensureCard() {
     if (this.content) return;
 
-    this.card = document.createElement("ha-card");
+    this.card = document.createElement('ha-card');
 
-    this.card.style.display = "flex";
-    this.card.style.justifyContent = "center";
-    this.card.style.alignItems = "center";
-    this.card.style.padding = "16px";
-    this.card.style.color = "white";
+    this.card.style.display = 'flex';
+    this.card.style.justifyContent = 'center';
+    this.card.style.alignItems = 'center';
+    this.card.style.padding = '16px';
+    this.card.style.color = 'white';
 
-    const numberBox = document.createElement("div");
-    numberBox.style.display = "flex";
-    numberBox.style.flexDirection = "row";
-    numberBox.style.justifyContent = "center";
-    numberBox.style.alignItems = "center";
-    numberBox.style.margin = "16px";
+    const numberBox = document.createElement('div');
+    numberBox.style.display = 'flex';
+    numberBox.style.flexDirection = 'row';
+    numberBox.style.justifyContent = 'center';
+    numberBox.style.alignItems = 'center';
+    numberBox.style.margin = '16px';
 
     this.numberEl = numberBox;
 
@@ -276,7 +276,12 @@ class LargeNumberCard extends HTMLElement {
 
   updateNumberDisplay(state_display_text, unit_of_measurement_text) {
     // apply card gradient using shadowConfig (rendered values) if available
-    const shadowCard = (this.shadowConfig && this.shadowConfig.card) ? this.shadowConfig.card : (this.config && this.config.card ? this.config.card : {});
+    const shadowCard =
+      this.shadowConfig && this.shadowConfig.card
+        ? this.shadowConfig.card
+        : this.config && this.config.card
+          ? this.config.card
+          : {};
     if (shadowCard && shadowCard.color) {
       // use shadow values (rendered templates or static values)
       // console.log("large-number-card: applying card colors", shadowCard.color, shadowCard.color2);
@@ -288,17 +293,20 @@ class LargeNumberCard extends HTMLElement {
     this.loadFont(numberFontFamily);
 
     // ensure number span
-    let number = this.numberEl.querySelector("span#number");
+    let number = this.numberEl.querySelector('span#number');
     if (!number) {
-      number = document.createElement("span");
-      number.id = "number";
+      number = document.createElement('span');
+      number.id = 'number';
       // small separation to unit handled by unit element margin
     }
     number.textContent = state_display_text;
-    number.style.fontSize = this.config.number.size + "px";
+    number.style.fontSize = this.config.number.size + 'px';
     number.style.fontWeight = this.config.number.font_weight;
     number.style.color = this.config.number.color;
-    number.style.fontFamily = numberFontFamily === 'Home Assistant' ? 'var(--ha-card-header-font-family, inherit)' : numberFontFamily;
+    number.style.fontFamily =
+      numberFontFamily === 'Home Assistant'
+        ? 'var(--ha-card-header-font-family, inherit)'
+        : numberFontFamily;
 
     // append or re-append ensures ordering when direction changes
     if (!number.parentElement) {
@@ -306,32 +314,39 @@ class LargeNumberCard extends HTMLElement {
     }
 
     // handle unit if displayed (guard in case unit_of_measurement is missing or null)
-    const uomCfg = this.config && this.config.unit_of_measurement ? this.config.unit_of_measurement : null;
+    const uomCfg =
+      this.config && this.config.unit_of_measurement ? this.config.unit_of_measurement : null;
     if (uomCfg && uomCfg.display) {
       // Load font for unit if different from number font
       const unitFontFamily = uomCfg.font_family || DEFAULT_CONFIG.unit_of_measurement.font_family;
       this.loadFont(unitFontFamily);
 
-      let unit_of_measurement_element = this.numberEl.querySelector("span#unit_of_measurement");
+      let unit_of_measurement_element = this.numberEl.querySelector('span#unit_of_measurement');
 
       if (!unit_of_measurement_element) {
-        unit_of_measurement_element = document.createElement("span");
-        unit_of_measurement_element.id = "unit_of_measurement";
+        unit_of_measurement_element = document.createElement('span');
+        unit_of_measurement_element.id = 'unit_of_measurement';
       }
 
       unit_of_measurement_element.textContent = unit_of_measurement_text;
-      unit_of_measurement_element.style.fontSize = (uomCfg.size || DEFAULT_CONFIG.unit_of_measurement.size) + "px";
-      unit_of_measurement_element.style.fontWeight = uomCfg.font_weight || DEFAULT_CONFIG.unit_of_measurement.font_weight;
-      unit_of_measurement_element.style.color = uomCfg.color || DEFAULT_CONFIG.unit_of_measurement.color;
-      unit_of_measurement_element.style.fontFamily = unitFontFamily === 'Home Assistant' ? 'var(--ha-card-header-font-family, inherit)' : unitFontFamily;
-      unit_of_measurement_element.style.margin = "0 8px";
+      unit_of_measurement_element.style.fontSize =
+        (uomCfg.size || DEFAULT_CONFIG.unit_of_measurement.size) + 'px';
+      unit_of_measurement_element.style.fontWeight =
+        uomCfg.font_weight || DEFAULT_CONFIG.unit_of_measurement.font_weight;
+      unit_of_measurement_element.style.color =
+        uomCfg.color || DEFAULT_CONFIG.unit_of_measurement.color;
+      unit_of_measurement_element.style.fontFamily =
+        unitFontFamily === 'Home Assistant'
+          ? 'var(--ha-card-header-font-family, inherit)'
+          : unitFontFamily;
+      unit_of_measurement_element.style.margin = '0 8px';
 
       if (!unit_of_measurement_element.parentElement) {
         this.numberEl.appendChild(unit_of_measurement_element);
       }
     } else {
       // remove unit element if present and not desired
-      const existingUnit = this.numberEl.querySelector("span#unit_of_measurement");
+      const existingUnit = this.numberEl.querySelector('span#unit_of_measurement');
       if (existingUnit && existingUnit.parentElement) {
         existingUnit.parentElement.removeChild(existingUnit);
       }
@@ -339,27 +354,29 @@ class LargeNumberCard extends HTMLElement {
 
     // layout direction when unit is prefix
     if (uomCfg && uomCfg.display && uomCfg.as_prefix) {
-      this.numberEl.style.flexDirection = "row-reverse";
+      this.numberEl.style.flexDirection = 'row-reverse';
     } else {
-      this.numberEl.style.flexDirection = "row";
+      this.numberEl.style.flexDirection = 'row';
     }
   }
 
   /**
     Deep merge helper to merge nested config objects like number, unit_of_measurement, card
   */
-  private deepMerge(target: any, source: any): any {
-    const out: any = Array.isArray(target) ? [...target] : { ...target };
-    if (source && typeof source === "object") {
+  private deepMerge(target: object | unknown[], source: object | unknown[]): object | unknown[] {
+    const out: object | unknown[] = Array.isArray(target) ? [...target] : { ...target };
+
+    if (source && typeof source === 'object') {
       for (const key of Object.keys(source)) {
         const val = source[key];
-        if (val && typeof val === "object" && !Array.isArray(val)) {
+        if (val && typeof val === 'object' && !Array.isArray(val)) {
           out[key] = this.deepMerge(target ? target[key] : {}, val);
         } else {
           out[key] = val;
         }
       }
     }
+
     return out;
   }
 
@@ -380,7 +397,6 @@ class LargeNumberCard extends HTMLElement {
   }
 }
 
-
 // Add this type declaration to fix TypeScript error re customCard
 declare global {
   interface Window {
@@ -397,6 +413,8 @@ console.info(
   `%c large-number-card ${version}`,
   'color: white; background-color:rgba(109, 51, 109, 1); font-weight: 700;'
 );
+
+export default LargeNumberCard;
 
 // This puts your card into the UI card picker dialog
 window.customCards = window.customCards || [];
