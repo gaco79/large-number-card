@@ -171,6 +171,17 @@ class LargeDisplayCard extends HTMLElement {
     } else if (hasEntityId && !hassStates) {
       // hass not yet available
       state_display_text = 'loading';
+    } else if (!hasEntityId) {
+      // no entity configured: use the `text` config key as fallback
+      const cfgText = this?.config?.text;
+      state_display_text = String(cfgText ?? '');
+
+      // unit: prefer explicit display_text from unit_of_measurement config when provided
+      const cfgUnitText = this?.config?.unit_of_measurement?.display_text;
+
+      if (cfgUnitText != null) {
+        unit_of_measurement_text = String(cfgUnitText);
+      }
     }
 
     return { state_display_text, unit_of_measurement_text };
@@ -389,8 +400,8 @@ class LargeDisplayCard extends HTMLElement {
     // initialize shadowConfig as a clone so templates can be re-rendered into it
     this.shadowConfig = this.deepMerge({}, this.config);
 
-    if (!this.config.entity_id) {
-      console.warn('large-display-card: no entity_id provided in config');
+    if (!this.config.entity_id && !this.config.text) {
+      console.warn('large-display-card: no entity_id or text provided in config');
     }
 
     this.updateContent();
