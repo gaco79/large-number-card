@@ -427,5 +427,5 @@ window.customCards.push({
   type: 'large-number-card',
   name: 'Large Number',
   description: 'Card displaying a large number.',
-  preview: true
+  preview: true,
 });
