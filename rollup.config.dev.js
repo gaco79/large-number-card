@@ -5,7 +5,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import json from '@rollup/plugin-json';
 
 export default {
-  input: ['src/large-number-card.ts'],
+  input: ['src/large-display-card.ts'],
   output: {
     dir: './dist',
     format: 'es',

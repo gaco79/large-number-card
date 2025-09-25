@@ -3,10 +3,10 @@ import { customElement } from 'lit/decorators.js';
 import { DEFAULT_CONFIG, FONT_REGISTRY } from './const';
 
 /**
- * LargeNumberCard
+ * Large Display Card
  *
- * A lightweight Home Assistant custom element (<large-number-card>) that displays a single
- * large numeric value with an optional unit of measurement. The element watches the
+ * A lightweight Home Assistant custom element (<large-display-card>) that displays a single
+ * large value with an optional unit of measurement. The element watches the
  * Home Assistant `hass` object (setter `hass`) and re-renders whenever the underlying
  * state for the configured `entity_id` changes.
  *
@@ -78,12 +78,12 @@ import { DEFAULT_CONFIG, FONT_REGISTRY } from './const';
  *
  * Notes
  * - This class is written as a native custom element (extends HTMLElement) and expects to be
- *   registered as @customElement("large-number-card") elsewhere in the codebase.
+ *   registered as @customElement("large-display-card") elsewhere in the codebase.
  * - Types are intentionally loose (any) for `hass` and `config` because the component is
  *   primarily configured with plain JS objects and integrates with Home Assistant's dynamic shape.
  */
-@customElement('large-number-card')
-class LargeNumberCard extends HTMLElement {
+@customElement('large-display-card')
+class LargeDisplayCard extends HTMLElement {
   content;
   config;
   _hass;
@@ -212,7 +212,7 @@ class LargeNumberCard extends HTMLElement {
               this.shadowConfig.card[key] = this.shadowConfig.card[key] || tpl;
             }
           } catch (err) {
-            console.warn(`large-number-card: template render failed for card.${key}`, err);
+            console.warn(`large-display-card: template render failed for card.${key}`, err);
             this.shadowConfig.card[key] = this.shadowConfig.card[key] || tpl;
           }
         } else {
@@ -226,7 +226,7 @@ class LargeNumberCard extends HTMLElement {
     }
 
     // debug
-    // console.log("large-number-card: shadow card colors", this.shadowConfig.card.color, this.shadowConfig.card.color2);
+    // console.log("large-display-card: shadow card colors", this.shadowConfig.card.color, this.shadowConfig.card.color2);
   }
 
   /**
@@ -284,7 +284,7 @@ class LargeNumberCard extends HTMLElement {
           : {};
     if (shadowCard && shadowCard.color) {
       // use shadow values (rendered templates or static values)
-      // console.log("large-number-card: applying card colors", shadowCard.color, shadowCard.color2);
+      // console.log("large-display-card: applying card colors", shadowCard.color, shadowCard.color2);
       this.card.style.background = `linear-gradient(135deg, ${shadowCard.color}, ${shadowCard.color2 || shadowCard.color})`;
     }
 
@@ -390,7 +390,7 @@ class LargeNumberCard extends HTMLElement {
     this.shadowConfig = this.deepMerge({}, this.config);
 
     if (!this.config.entity_id) {
-      console.warn('large-number-card: no entity_id provided in config');
+      console.warn('large-display-card: no entity_id provided in config');
     }
 
     this.updateContent();
@@ -415,17 +415,17 @@ declare global {
 
 /* eslint no-console: 0 */
 console.info(
-  `%c large-number-card ${version}`,
+  `%c large-display-card ${version}`,
   'color: white; background-color:rgba(109, 51, 109, 1); font-weight: 700;'
 );
 
-export default LargeNumberCard;
+export default LargeDisplayCard;
 
 // This puts the card into the UI card picker dialog
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: 'large-number-card',
+  type: 'large-display-card',
   name: 'Large Number',
-  description: 'Card displaying a large number.',
+  description: 'Card displaying a large value.',
   preview: true,
 });

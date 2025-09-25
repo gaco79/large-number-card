@@ -1,13 +1,13 @@
 services:
   homeassistant:
     image: ghcr.io/home-assistant/home-assistant:stable
-    container_name: homeassistant-large-number-card
+    container_name: homeassistant-large-display-card
     privileged: true
     restart: unless-stopped
     volumes:
       - ./config:/config
       - ./configuration.yaml:/config/configuration.yaml
-      - ./dist:/config/www/large-number-card
+      - ./dist:/config/www/large-display-card
     ports:
       - "8123:8123"
     environment:

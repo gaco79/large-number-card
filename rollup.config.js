@@ -18,7 +18,7 @@ const plugins = [
 
 export default [
   {
-    input: 'src/large-number-card.ts',
+    input: 'src/large-display-card.ts',
     output: {
       dir: 'dist',
       format: 'es',

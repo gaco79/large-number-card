@@ -1,10 +1,10 @@
 [//]: # (Project title updated from copied templates)
 # Large Number Card
 
-![GitHub Release](https://img.shields.io/github/v/release/gaco79/large-number-card?style=for-the-badge)
-![Downloads](https://img.shields.io/github/downloads/gaco79/large-number-card/total?style=for-the-badge)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/gaco79/large-number-card?style=for-the-badge)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/gaco79/large-number-card/cd.yml?style=for-the-badge)
+![GitHub Release](https://img.shields.io/github/v/release/gaco79/large-display-card?style=for-the-badge)
+![Downloads](https://img.shields.io/github/downloads/gaco79/large-display-card/total?style=for-the-badge)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/gaco79/large-display-card?style=for-the-badge)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/gaco79/large-display-card/cd.yml?style=for-the-badge)
 [![BuyMeACoffee](https://img.shields.io/badge/-buy_me_a%C2%A0coffee-gray?logo=buy-me-a-coffee&style=for-the-badge)](https://www.buymeacoffee.com/gaco79)
 
 <p align="center">A Home Assistant card to display a single number prominently.</p>
@@ -14,18 +14,18 @@
 
 ### HACS (recommended)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=gaco79&repository=large-number-card&category=plugin)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=gaco79&repository=large-display-card&category=plugin)
 
 ### Manual install (Not recommended)
 
-1. Download and copy `large-number-card.js` from the [latest release](https://github.com/gaco79/large-number-card/releases/latest) into your `config/www` directory.
+1. Download and copy `large-display-card.js` from the [latest release](https://github.com/gaco79/large-display-card/releases/latest) into your `config/www` directory.
 2. Add the resource reference inside your `configuration.yaml`
 
 ```yaml
 lovelace:
   mode: yaml
   resources:
-    - url: /local/large-number-card.js
+    - url: /local/large-display-card.js
       type: module
 ```
 
@@ -36,7 +36,7 @@ In Home Assistant click `Edit Dashboard`, then `Add Card` and scroll down to fin
 #### Sample Configuration
 
 ```YAML
-type: custom:large-number-card
+type: custom:large-display-card
 card:
   color: red
 number:
@@ -60,7 +60,7 @@ The card supports custom fonts for both the number and unit of measurement. Font
 
 ```YAML
 # Use a Google Font for the number only
-type: custom:large-number-card
+type: custom:large-display-card
 entity_id: sensor.temperature
 number:
   size: 64
@@ -73,7 +73,7 @@ unit_of_measurement:
 
 ```YAML
 # Use the same custom font for both number and unit
-type: custom:large-number-card
+type: custom:large-display-card
 entity_id: sensor.power
 number:
   size: 48

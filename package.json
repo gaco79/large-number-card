@@ -1,7 +1,7 @@
 {
-  "name": "large-number-card",
+  "name": "large-display-card",
   "version": "0.0.1",
-  "description": "Card to display numbers prominenetly in Home Assistant",
+  "description": "Card to display values prominently in Home Assistant",
   "keywords": [
     "home-assistant",
     "homeassistant",
@@ -10,8 +10,8 @@
     "custom-cards"
   ],
   "type": "module",
-  "module": "large-number-card.js",
-  "repository": "https://github.com/gaco79/large-number-card",
+  "module": "large-display-card.js",
+  "repository": "https://github.com/gaco79/large-display-card",
   "author": "Gareth Cooper <gareth@garethcooper.com>",
   "license": "MIT",
   "dependencies": {

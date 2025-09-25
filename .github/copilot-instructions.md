@@ -12,7 +12,7 @@ This is a TypeScript/JavaScript Home Assistant Lovelace custom card that display
 
 ### Build System
 - **Production build**: `npm run build` - takes ~5 seconds total 
-- **Build only (skip linting)**: `npm run rollup` - takes ~3 seconds, produces `dist/large-number-card.js`
+- **Build only (skip linting)**: `npm run rollup` - takes ~3 seconds, produces `dist/large-display-card.js`
 - **Development watch mode**: `npm start` - runs Rollup in watch mode, rebuilds automatically on file changes
 
 ### Code Quality
@@ -41,10 +41,10 @@ This is a TypeScript/JavaScript Home Assistant Lovelace custom card that display
 │   ├── cd.yml               # Release automation
 │   └── hacs.yml             # HACS validation
 ├── src/                     # Source code
-│   ├── large-number-card.ts # Main component
+│   ├── large-display-card.ts # Main component
 │   ├── const.ts             # Default configuration
 │   └── style.ts             # CSS styles
-├── dist/                    # Build output (large-number-card.js)
+├── dist/                    # Build output (large-display-card.js)
 ├── docker-compose.yaml      # Home Assistant dev environment
 ├── configuration.yaml       # HA config for development
 ├── package.json            # Build scripts and dependencies
