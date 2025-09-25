@@ -188,7 +188,7 @@ class LargeDisplayCard extends HTMLElement {
   }
 
   /**
-   * If card.color is a template, render it via hass.callApi and update shadowConfig.card.color.
+   * If card.color or card.background is a template, render it via hass.callApi and update shadowConfig.
    */
   private async applyCardTemplateColor() {
     // ensure config/card present
@@ -203,7 +203,7 @@ class LargeDisplayCard extends HTMLElement {
     }
 
     const cardCfg = this.config.card || {};
-    const keys = ['color', 'color2'];
+    const keys = ['color', 'background'];
 
     for (const key of keys) {
       const tpl = cardCfg[key];
@@ -237,7 +237,7 @@ class LargeDisplayCard extends HTMLElement {
     }
 
     // debug
-    // console.log("large-display-card: shadow card colors", this.shadowConfig.card.color, this.shadowConfig.card.color2);
+    // console.log("large-display-card: shadow card config", this.shadowConfig.card.color, this.shadowConfig.card.background);
   }
 
   /**
@@ -286,17 +286,22 @@ class LargeDisplayCard extends HTMLElement {
   }
 
   updateNumberDisplay(state_display_text, unit_of_measurement_text) {
-    // apply card gradient using shadowConfig (rendered values) if available
+    // apply card background using shadowConfig (rendered values) if available
     const shadowCard =
       this.shadowConfig && this.shadowConfig.card
         ? this.shadowConfig.card
         : this.config && this.config.card
           ? this.config.card
           : {};
-    if (shadowCard && shadowCard.color) {
-      // use shadow values (rendered templates or static values)
-      // console.log("large-display-card: applying card colors", shadowCard.color, shadowCard.color2);
-      this.card.style.background = `linear-gradient(135deg, ${shadowCard.color}, ${shadowCard.color2 || shadowCard.color})`;
+
+    // Use card.background if available, otherwise fall back to card.color gradient
+    if (shadowCard && shadowCard.background) {
+      // use background value directly - supports any CSS background value
+      this.card.style.background = shadowCard.background;
+    } else if (shadowCard && shadowCard.color) {
+      // fallback to legacy color gradient behavior for backward compatibility
+      // Note: color2 is no longer supported, use color for solid background
+      this.card.style.background = `linear-gradient(135deg, ${shadowCard.color}, ${shadowCard.color})`;
     }
 
     // Load fonts if needed
