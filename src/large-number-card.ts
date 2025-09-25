@@ -380,6 +380,10 @@ class LargeNumberCard extends HTMLElement {
     return out;
   }
 
+  /**
+   * Set the configuration for the card.
+   * @param config
+   */
   setConfig(config) {
     this.config = this.deepMerge(DEFAULT_CONFIG, config || {});
     // initialize shadowConfig as a clone so templates can be re-rendered into it
@@ -404,6 +408,7 @@ declare global {
       type: string;
       name: string;
       description: string;
+      preview: boolean;
     }>;
   }
 }
@@ -416,10 +421,11 @@ console.info(
 
 export default LargeNumberCard;
 
-// This puts your card into the UI card picker dialog
+// This puts the card into the UI card picker dialog
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'large-number-card',
   name: 'Large Number',
   description: 'Card displaying a large number.',
+  preview: true
 });
